@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Đăng nhập Firebase</title>
+
+<style>
+*{
+    box-sizing:border-box;
+    font-family:Arial,sans-serif;
+}
+
+body{
+    margin:0;
+    height:100vh;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    background:linear-gradient(135deg,#667eea,#764ba2);
+}
+
+.box{
+    width:350px;
+    background:white;
+    padding:30px;
+    border-radius:15px;
+    box-shadow:0 10px 25px rgba(0,0,0,.2);
+}
+
+h2{
+    text-align:center;
+    margin-bottom:20px;
+}
+
+input{
+    width:100%;
+    padding:12px;
+    margin:8px 0;
+    border:1px solid #ccc;
+    border-radius:8px;
+}
+
+button{
+    width:100%;
+    padding:12px;
+    margin-top:8px;
+    border:none;
+    border-radius:8px;
+    cursor:pointer;
+    font-size:15px;
+}
+
+.register{
+    background:#28a745;
+    color:white;
+}
+
+.login{
+    background:#007bff;
+    color:white;
+}
+
+#msg{
+    text-align:center;
+    margin-top:10px;
+    color:red;
+}
+</style>
+
+</head>
+<body>
+
+<div class="box">
+
+<h2>Đăng nhập Firebase</h2>
+
+<input id="email" type="email" placeholder="Nhập email">
+
+<input id="password" type="password" placeholder="Nhập mật khẩu">
+
+<button class="register" id="registerBtn">
+Đăng ký
+</button>
+
+<button class="login" id="loginBtn">
+Đăng nhập
+</button>
+
+<div id="msg"></div>
+
+</div>
+
+<script type="module">
+
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-app.js";
+
+import {
+getAuth,
+createUserWithEmailAndPassword,
+signInWithEmailAndPassword
+}
+from "https://www.gstatic.com/firebasejs/12.0.0/firebase-auth.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyA4uQqg-Akwqm6F3PfxUrnXY_UNCvIVsxo",
+  authDomain: "my-login-app-8cd0a.firebaseapp.com",
+  projectId: "my-login-app-8cd0a",
+  storageBucket: "my-login-app-8cd0a.firebasestorage.app",
+  messagingSenderId: "963802399528",
+  appId: "1:963802399528:web:5deb03e885033c9443461d"
+};
+
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+
+const emailInput = document.getElementById("email");
+const passwordInput = document.getElementById("password");
+const msg = document.getElementById("msg");
+
+document.getElementById("registerBtn").addEventListener("click", async () => {
+
+    try{
+
+        await createUserWithEmailAndPassword(
+            auth,
+            emailInput.value.trim(),
+            passwordInput.value
+        );
+
+        msg.style.color = "green";
+        msg.innerText = "Đăng ký thành công!";
+
+    }catch(error){
+
+        msg.style.color = "red";
+        msg.innerText = error.message;
+
+    }
+
+});
+
+document.getElementById("loginBtn").addEventListener("click", async () => {
+
+    try{
+
+        await signInWithEmailAndPassword(
+            auth,
+            emailInput.value.trim(),
+            passwordInput.value
+        );
+
+        window.location.href = "home.html";
+
+    }catch(error){
+
+        msg.style.color = "red";
+        msg.innerText = error.message;
+
+    }
+
+});
+
+</script>
+
+</body>
+</html>
