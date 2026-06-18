@@ -1,167 +1,71 @@
-<!DOCTYPE html>
+<script type="module">
 
-<html lang="vi">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>🐍 Rắn Săn Mồi</title>
+import { initializeApp }
+from "https://www.gstatic.com/firebasejs/12.0.0/firebase-app.js";
 
-<style>
-
-body{
-margin:0;
-background:#0f172a;
-color:white;
-font-family:Arial,sans-serif;
-display:flex;
-flex-direction:column;
-align-items:center;
+import {
+getAuth
 }
+from "https://www.gstatic.com/firebasejs/12.0.0/firebase-auth.js";
 
-h1{
-margin-top:15px;
+import {
+getFirestore,
+collection,
+addDoc
 }
+from "https://www.gstatic.com/firebasejs/12.0.0/firebase-firestore.js";
 
-#score{
-font-size:22px;
-margin-bottom:10px;
-}
+const firebaseConfig = {
+apiKey: "AIzaSyA4uQqg-Akwqm6F3PfxUrnXY_UNCvIVsxo",
+authDomain: "my-login-app-8cd0a.firebaseapp.com",
+projectId: "my-login-app-8cd0a",
+storageBucket: "my-login-app-8cd0a.firebasestorage.app",
+messagingSenderId: "963802399528",
+appId: "1:963802399528:web:5deb03e885033c9443461d"
+};
 
-canvas{
-background:#111827;
-border:3px solid #22c55e;
-}
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getFirestore(app);
 
-.controls{
-margin-top:20px;
-display:grid;
-grid-template-columns:80px 80px 80px;
-gap:10px;
-}
-
-.controls button{
-height:60px;
-font-size:24px;
-border:none;
-border-radius:10px;
-cursor:pointer;
-background:#334155;
-color:white;
-}
-
-.back{
-margin-top:20px;
-padding:10px 20px;
-border:none;
-background:#ef4444;
-color:white;
-border-radius:8px;
-cursor:pointer;
-}
-
-#gameOverBox{
-display:none;
-position:fixed;
-top:50%;
-left:50%;
-transform:translate(-50%,-50%);
-background:#1e293b;
-padding:25px;
-border-radius:15px;
-text-align:center;
-box-shadow:0 0 20px rgba(0,0,0,.5);
-}
-
-#gameOverBox button{
-margin:10px;
-padding:10px 15px;
-cursor:pointer;
-}
-
-</style>
-
-</head>
-<body>
-
-<h1>🐍 Rắn Săn Mồi</h1>
-
-<div id="score">
-Điểm: 0
-</div>
-
-<canvas
-id="game"
-width="400"
-height="400"> </canvas>
-
-<div class="controls">
-
-<div></div>
-
-<button onclick="changeDir('UP')">
-⬆
-</button>
-
-<div></div>
-
-<button onclick="changeDir('LEFT')">
-⬅
-</button>
-
-<button onclick="changeDir('DOWN')">
-⬇
-</button>
-
-<button onclick="changeDir('RIGHT')">
-➡
-</button>
-
-</div>
-
-<button
-class="back"
-onclick="location.href='home.html'">
-🏠 Về Game Hub </button>
-
-<div id="gameOverBox">
-
-<h2>💀 Game Over</h2>
-
-<p id="finalScore"></p>
-
-<button onclick="location.reload()">
-🔄 Chơi lại
-</button>
-
-<button onclick="location.href='home.html'">
-🏠 Game Hub
-</button>
-
-</div>
-
-<script>
-
-const canvas =
-document.getElementById("game");
-
-const ctx =
-canvas.getContext("2d");
+const canvas = document.getElementById("game");
+const ctx = canvas.getContext("2d");
 
 const box = 20;
 
-let snake = [
-{x:200,y:200}
-];
-
+let snake = [{x:200,y:200}];
 let food = randomFood();
-
 let score = 0;
-
 let direction = "RIGHT";
-
 let speed = 120;
-
 let gameLoop;
+
+async function saveScore(){
+
+const user = auth.currentUser;
+
+if(!user) return;
+
+try{
+
+await addDoc(
+collection(db,"scores"),
+{
+email:user.email,
+score:score,
+createdAt:Date.now()
+}
+);
+
+console.log("Đã lưu điểm");
+
+}catch(error){
+
+console.error(error);
+
+}
+
+}
 
 function randomFood(){
 
@@ -188,36 +92,35 @@ direction="RIGHT";
 
 }
 
+window.changeDir = changeDir;
+
 document.addEventListener("keydown",(e)=>{
 
-if(e.key==="ArrowUp")
-changeDir("UP");
-
-if(e.key==="ArrowDown")
-changeDir("DOWN");
-
-if(e.key==="ArrowLeft")
-changeDir("LEFT");
-
-if(e.key==="ArrowRight")
-changeDir("RIGHT");
+if(e.key==="ArrowUp") changeDir("UP");
+if(e.key==="ArrowDown") changeDir("DOWN");
+if(e.key==="ArrowLeft") changeDir("LEFT");
+if(e.key==="ArrowRight") changeDir("RIGHT");
 
 });
 
-function gameOver(){
+async function gameOver(){
 
-    clearInterval(gameLoop);
+clearInterval(gameLoop);
 
-    const playAgain = confirm(
-        "💀 Game Over!\n\nĐiểm của bạn: " + score +
-        "\n\nOK = Chơi lại\nCancel = Về Game Hub"
-    );
+await saveScore();
 
-    if(playAgain){
-        location.reload();
-    }else{
-        location.href = "home.html";
-    }
+const playAgain = confirm(
+"💀 Game Over!\n\nĐiểm của bạn: "
++ score +
+"\n\nOK = Chơi lại\nCancel = Về Game Hub"
+);
+
+if(playAgain){
+location.reload();
+}else{
+location.href="home.html";
+}
+
 }
 
 function draw(){
@@ -226,12 +129,7 @@ ctx.fillStyle="#111827";
 ctx.fillRect(0,0,400,400);
 
 ctx.fillStyle="red";
-ctx.fillRect(
-food.x,
-food.y,
-box,
-box
-);
+ctx.fillRect(food.x,food.y,box,box);
 
 snake.forEach((part,index)=>{
 
@@ -252,23 +150,16 @@ box
 let headX = snake[0].x;
 let headY = snake[0].y;
 
-if(direction==="UP")
-headY -= box;
-
-if(direction==="DOWN")
-headY += box;
-
-if(direction==="LEFT")
-headX -= box;
-
-if(direction==="RIGHT")
-headX += box;
+if(direction==="UP") headY-=box;
+if(direction==="DOWN") headY+=box;
+if(direction==="LEFT") headX-=box;
+if(direction==="RIGHT") headX+=box;
 
 if(
-headX < 0 ||
-headY < 0 ||
-headX >= 400 ||
-headY >= 400
+headX<0 ||
+headY<0 ||
+headX>=400 ||
+headY>=400
 ){
 gameOver();
 return;
@@ -298,10 +189,8 @@ headY===food.y
 
 score++;
 
-document.getElementById(
-"score"
-).innerText =
-"Điểm: " + score;
+document.getElementById("score")
+.innerText = "Điểm: " + score;
 
 food = randomFood();
 
@@ -315,10 +204,7 @@ speed - 10
 );
 
 gameLoop =
-setInterval(
-draw,
-speed
-);
+setInterval(draw,speed);
 
 }
 
@@ -332,9 +218,6 @@ snake.unshift(newHead);
 
 }
 
-gameLoop = setInterval(draw, speed);
+gameLoop = setInterval(draw,speed);
 
 </script>
-
-</body>
-</html>
