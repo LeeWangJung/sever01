@@ -1,3 +1,125 @@
+<!DOCTYPE html>
+
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🐍 Rắn Săn Mồi</title>
+
+<style>
+body{
+margin:0;
+background:#0f172a;
+color:white;
+font-family:Arial,sans-serif;
+display:flex;
+flex-direction:column;
+align-items:center;
+padding:15px;
+}
+
+h1{
+margin:10px 0;
+}
+
+#playerEmail{
+margin-bottom:10px;
+color:#94a3b8;
+}
+
+#score{
+font-size:22px;
+margin-bottom:10px;
+}
+
+canvas{
+background:#111827;
+border:3px solid #22c55e;
+max-width:100%;
+}
+
+.controls{
+margin-top:20px;
+display:grid;
+grid-template-columns:80px 80px 80px;
+gap:10px;
+}
+
+.controls button{
+height:60px;
+font-size:24px;
+border:none;
+border-radius:10px;
+cursor:pointer;
+background:#334155;
+color:white;
+}
+
+.back{
+margin-top:20px;
+padding:10px 20px;
+border:none;
+background:#ef4444;
+color:white;
+border-radius:8px;
+cursor:pointer;
+}
+
+table{
+width:100%;
+max-width:600px;
+margin-top:20px;
+border-collapse:collapse;
+background:white;
+color:black;
+}
+
+th,td{
+border:1px solid #ddd;
+padding:8px;
+text-align:center;
+}
+</style>
+
+</head>
+<body>
+
+<h1>🐍 Rắn Săn Mồi</h1>
+
+<div id="playerEmail">
+Đang tải...
+</div>
+
+<div id="score">
+Điểm: 0
+</div>
+
+<canvas id="game" width="400" height="400"></canvas>
+
+<div class="controls">
+<div></div>
+<button onclick="changeDir('UP')">⬆</button>
+<div></div>
+
+<button onclick="changeDir('LEFT')">⬅</button> <button onclick="changeDir('DOWN')">⬇</button> <button onclick="changeDir('RIGHT')">➡</button>
+
+</div>
+
+<button
+class="back"
+onclick="location.href='home.html'">
+🏠 Về Game Hub </button>
+
+<h2>🏆 TOP 10</h2>
+
+<table id="leaderboard">
+<tr>
+<th>Hạng</th>
+<th>Email</th>
+<th>Điểm</th>
+</tr>
+</table>
+
 <script type="module">
 
 import { initializeApp }
@@ -12,13 +134,11 @@ from "https://www.gstatic.com/firebasejs/12.0.0/firebase-auth.js";
 import {
 getFirestore,
 collection,
+addDoc,
 query,
 orderBy,
 limit,
-getDocs,
-doc,
-getDoc,
-setDoc
+getDocs
 }
 from "https://www.gstatic.com/firebasejs/12.0.0/firebase-firestore.js";
 
@@ -48,32 +168,22 @@ document.getElementById("playerEmail").innerText =
 
 }else{
 
-location.href="index.html";
+location.href = "index.html";
 
 }
 
 });
 
-const canvas =
-document.getElementById("game");
-
-const ctx =
-canvas.getContext("2d");
+const canvas = document.getElementById("game");
+const ctx = canvas.getContext("2d");
 
 const box = 20;
 
-let snake = [
-{x:200,y:200}
-];
-
+let snake = [{x:200,y:200}];
 let food = randomFood();
-
 let score = 0;
-
 let direction = "RIGHT";
-
 let speed = 120;
-
 let gameLoop;
 
 function randomFood(){
@@ -103,17 +213,10 @@ direction="RIGHT";
 
 document.addEventListener("keydown",(e)=>{
 
-if(e.key==="ArrowUp")
-changeDir("UP");
-
-if(e.key==="ArrowDown")
-changeDir("DOWN");
-
-if(e.key==="ArrowLeft")
-changeDir("LEFT");
-
-if(e.key==="ArrowRight")
-changeDir("RIGHT");
+if(e.key==="ArrowUp") changeDir("UP");
+if(e.key==="ArrowDown") changeDir("DOWN");
+if(e.key==="ArrowLeft") changeDir("LEFT");
+if(e.key==="ArrowRight") changeDir("RIGHT");
 
 });
 
@@ -121,35 +224,14 @@ async function saveScore(){
 
 if(!currentUser) return;
 
-const userRef =
-doc(db,"scores",currentUser.uid);
-
-const userSnap =
-await getDoc(userRef);
-
-let bestScore = 0;
-
-if(userSnap.exists()){
-
-bestScore =
-userSnap.data().snakeScore || 0;
-
-}
-
-if(score > bestScore){
-
-await setDoc(
-userRef,
+await addDoc(
+collection(db,"scores"),
 {
 email:currentUser.email,
-snakeScore:score,
-totalScore:score,
-updatedAt:Date.now()
-},
-{merge:true}
-);
-
+score:score,
+createdAt:Date.now()
 }
+);
 
 }
 
@@ -157,12 +239,11 @@ async function loadLeaderboard(){
 
 const q = query(
 collection(db,"scores"),
-orderBy("snakeScore","desc"),
+orderBy("score","desc"),
 limit(10)
 );
 
-const snapshot =
-await getDocs(q);
+const snapshot = await getDocs(q);
 
 let html = `
 <tr>
@@ -174,22 +255,21 @@ let html = `
 
 let rank = 1;
 
-snapshot.forEach((item)=>{
+snapshot.forEach((doc)=>{
 
-const data = item.data();
+const data = doc.data();
 
 html += `
 <tr>
 <td>${rank++}</td>
 <td>${data.email}</td>
-<td>${data.snakeScore || 0}</td>
+<td>${data.score}</td>
 </tr>
 `;
 
 });
 
-document.getElementById("leaderboard")
-.innerHTML = html;
+document.getElementById("leaderboard").innerHTML = html;
 
 }
 
@@ -204,17 +284,11 @@ await loadLeaderboard();
 const playAgain = confirm(
 "💀 Game Over!\n\nĐiểm của bạn: "
 + score +
-"\n\nOK = Chơi lại\nCancel = Về Game Hub"
+"\n\nOK = Chơi lại"
 );
 
 if(playAgain){
-
 location.reload();
-
-}else{
-
-location.href="home.html";
-
 }
 
 }
@@ -222,60 +296,29 @@ location.href="home.html";
 function draw(){
 
 ctx.fillStyle="#111827";
-
-ctx.fillRect(
-0,
-0,
-400,
-400
-);
+ctx.fillRect(0,0,400,400);
 
 ctx.fillStyle="red";
-
-ctx.fillRect(
-food.x,
-food.y,
-box,
-box
-);
+ctx.fillRect(food.x,food.y,box,box);
 
 snake.forEach((part,index)=>{
 
 ctx.fillStyle =
-index===0
-? "#22c55e"
-: "#16a34a";
+index===0 ? "#22c55e" : "#16a34a";
 
-ctx.fillRect(
-part.x,
-part.y,
-box,
-box
-);
+ctx.fillRect(part.x,part.y,box,box);
 
 });
 
 let headX = snake[0].x;
 let headY = snake[0].y;
 
-if(direction==="UP")
-headY -= box;
+if(direction==="UP") headY-=box;
+if(direction==="DOWN") headY+=box;
+if(direction==="LEFT") headX-=box;
+if(direction==="RIGHT") headX+=box;
 
-if(direction==="DOWN")
-headY += box;
-
-if(direction==="LEFT")
-headX -= box;
-
-if(direction==="RIGHT")
-headX += box;
-
-if(
-headX < 0 ||
-headY < 0 ||
-headX >= 400 ||
-headY >= 400
-){
+if(headX<0||headY<0||headX>=400||headY>=400){
 gameOver();
 return;
 }
@@ -292,20 +335,13 @@ return;
 
 }
 
-const newHead = {
-x:headX,
-y:headY
-};
+const newHead={x:headX,y:headY};
 
-if(
-headX===food.x &&
-headY===food.y
-){
+if(headX===food.x && headY===food.y){
 
 score++;
 
-document.getElementById("score")
-.innerText =
+document.getElementById("score").innerText =
 "Điểm: " + score;
 
 food = randomFood();
@@ -320,16 +356,11 @@ snake.unshift(newHead);
 
 }
 
-gameLoop =
-setInterval(
-draw,
-speed
-);
+gameLoop = setInterval(draw,speed);
 
-try{
-  loadLeaderboard();
-}catch(e){
-  console.log(e);
-}
+loadLeaderboard();
 
 </script>
+
+</body>
+</html>
