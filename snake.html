@@ -133,12 +133,9 @@ from "https://www.gstatic.com/firebasejs/12.0.0/firebase-auth.js";
 
 import {
 getFirestore,
-collection,
-addDoc,
-query,
-orderBy,
-limit,
-getDocs
+doc,
+getDoc,
+setDoc
 }
 from "https://www.gstatic.com/firebasejs/12.0.0/firebase-firestore.js";
 
@@ -277,7 +274,40 @@ async function gameOver(){
 
 clearInterval(gameLoop);
 
-await saveScore();
+async function saveScore(){
+
+if(!currentUser) return;
+
+const userRef =
+doc(db,"scores",currentUser.uid);
+
+const userSnap =
+await getDoc(userRef);
+
+let oldScore = 0;
+
+if(userSnap.exists()){
+
+oldScore =
+userSnap.data().snakeScore || 0;
+
+}
+
+if(score > oldScore){
+
+await setDoc(
+userRef,
+{
+email:currentUser.email,
+snakeScore:score,
+updatedAt:Date.now()
+},
+{merge:true}
+);
+
+}
+
+};
 
 await loadLeaderboard();
 
