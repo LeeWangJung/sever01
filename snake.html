@@ -206,17 +206,18 @@ changeDir("RIGHT");
 
 function gameOver(){
 
-clearInterval(gameLoop);
+    clearInterval(gameLoop);
 
-document.getElementById(
-"finalScore"
-).innerText =
-"Điểm của bạn: " + score;
+    const playAgain = confirm(
+        "💀 Game Over!\n\nĐiểm của bạn: " + score +
+        "\n\nOK = Chơi lại\nCancel = Về Game Hub"
+    );
 
-document.getElementById(
-"gameOverBox"
-).style.display = "block";
-
+    if(playAgain){
+        location.reload();
+    }else{
+        location.href = "home.html";
+    }
 }
 
 function draw(){
@@ -331,11 +332,7 @@ snake.unshift(newHead);
 
 }
 
-gameLoop =
-setInterval(
-draw,
-speed
-);
+gameLoop = setInterval(draw, speed);
 
 </script>
 
