@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Đăng ký tài khoản</title>
+
+<style>
+
+body{
+display:flex;
+justify-content:center;
+align-items:center;
+height:100vh;
+font-family:Arial;
+background:linear-gradient(135deg,#667eea,#764ba2);
+}
+
+.box{
+background:white;
+padding:30px;
+width:400px;
+border-radius:10px;
+}
+
+input{
+width:100%;
+padding:10px;
+margin:8px 0;
+}
+
+button{
+width:100%;
+padding:10px;
+margin-top:10px;
+cursor:pointer;
+}
+
+#msg{
+margin-top:10px;
+text-align:center;
+}
+
+</style>
+
+</head>
+<body>
+
+<div class="box">
+
+<h2>Đăng ký tài khoản</h2>
+
+<input
+id="email"
+type="email"
+placeholder="Email">
+
+<input
+id="password"
+type="password"
+placeholder="Mật khẩu">
+
+<button id="registerBtn">
+Tạo tài khoản
+</button>
+
+<button onclick="window.location.href='index.html'">
+Quay lại đăng nhập
+</button>
+
+<div id="msg"></div>
+
+</div>
+
+<script type="module">
+
+import { initializeApp }
+from "https://www.gstatic.com/firebasejs/12.0.0/firebase-app.js";
+
+import {
+getAuth,
+createUserWithEmailAndPassword
+}
+from "https://www.gstatic.com/firebasejs/12.0.0/firebase-auth.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyA4uQqg-Akwqm6F3PfxUrnXY_UNCvIVsxo",
+  authDomain: "my-login-app-8cd0a.firebaseapp.com",
+  projectId: "my-login-app-8cd0a",
+  storageBucket: "my-login-app-8cd0a.firebasestorage.app",
+  messagingSenderId: "963802399528",
+  appId: "1:963802399528:web:5deb03e885033c9443461d"
+};
+
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+
+document
+.getElementById("registerBtn")
+.addEventListener("click",async()=>{
+
+const email =
+document.getElementById("email").value;
+
+const password =
+document.getElementById("password").value;
+
+try{
+
+await createUserWithEmailAndPassword(
+auth,
+email,
+password
+);
+
+msg.style.color="green";
+
+msg.innerText=
+"Đăng ký thành công";
+
+setTimeout(()=>{
+
+window.location.href="index.html";
+
+},1500);
+
+}catch(error){
+
+msg.style.color="red";
+
+msg.innerText=
+error.message;
+
+}
+
+});
+
+</script>
+
+</body>
+</html>
