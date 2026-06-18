@@ -326,6 +326,10 @@ draw,
 speed
 );
 
-loadLeaderboard();
+try{
+  loadLeaderboard();
+}catch(e){
+  console.log(e);
+}
 
 </script>
