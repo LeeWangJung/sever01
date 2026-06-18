@@ -1,17 +1,217 @@
-<!-- Chỉ thay phần này vào trong .container, ngay dưới GAME HUB -->
+<!DOCTYPE html>
 
-<h1 class="title">
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>🎮 Game Hub</title>
+
+<style>
+
+*{
+margin:0;
+padding:0;
+box-sizing:border-box;
+font-family:Arial,sans-serif;
+}
+
+body{
+background:linear-gradient(
+135deg,
+#0f172a,
+#1e293b,
+#312e81
+);
+min-height:100vh;
+color:white;
+}
+
+.header{
+display:flex;
+justify-content:space-between;
+align-items:center;
+padding:20px;
+background:rgba(0,0,0,.2);
+backdrop-filter:blur(10px);
+}
+
+.logo{
+font-size:30px;
+font-weight:bold;
+}
+
+.userBox{
+display:flex;
+align-items:center;
+gap:10px;
+}
+
+.logout{
+padding:10px 15px;
+border:none;
+border-radius:10px;
+background:#ef4444;
+color:white;
+cursor:pointer;
+}
+
+.hero{
+text-align:center;
+padding:50px 20px;
+}
+
+.hero h1{
+font-size:50px;
+margin-bottom:10px;
+}
+
+.hero p{
+color:#cbd5e1;
+}
+
+.container{
+max-width:1200px;
+margin:auto;
+padding:20px;
+}
+
+.sectionTitle{
+margin:30px 0 20px;
+font-size:28px;
+}
+
+.grid{
+display:grid;
+grid-template-columns:repeat(auto-fit,minmax(280px,1fr));
+gap:20px;
+}
+
+.card{
+background:rgba(255,255,255,.08);
+backdrop-filter:blur(12px);
+border-radius:20px;
+padding:25px;
+text-align:center;
+transition:.3s;
+}
+
+.card:hover{
+transform:translateY(-10px);
+box-shadow:0 0 30px rgba(34,197,94,.4);
+}
+
+.icon{
+font-size:60px;
+margin-bottom:15px;
+}
+
+.card h2{
+margin-bottom:10px;
+}
+
+.card p{
+color:#cbd5e1;
+margin-bottom:20px;
+}
+
+.playBtn{
+background:#22c55e;
+color:white;
+border:none;
+padding:12px 25px;
+border-radius:10px;
+cursor:pointer;
+font-size:16px;
+}
+
+.comingBtn{
+background:#64748b;
+color:white;
+border:none;
+padding:12px 25px;
+border-radius:10px;
+}
+
+table{
+width:100%;
+border-collapse:collapse;
+margin-top:20px;
+background:white;
+color:black;
+border-radius:15px;
+overflow:hidden;
+}
+
+th{
+background:#22c55e;
+color:white;
+padding:12px;
+}
+
+td{
+padding:10px;
+border-bottom:1px solid #ddd;
+text-align:center;
+}
+
+tr:hover{
+background:#f3f4f6;
+}
+
+.footer{
+text-align:center;
+padding:30px;
+color:#cbd5e1;
+}
+
+</style>
+
+</head>
+<body>
+
+<div class="header">
+
+<div class="logo">
 🎮 GAME HUB
-</h1>
+</div>
+
+<div class="userBox">
+👤 <span id="userEmail">Đang tải...</span>
+
+<button class="logout" onclick="logout()">
+Đăng xuất
+</button>
+</div>
+
+</div>
+
+<div class="hero">
+
+<h1>Chào mừng đến Game Hub</h1>
+
+<p>
+Chơi game, lưu điểm và cạnh tranh trên bảng xếp hạng.
+</p>
+
+</div>
+
+<div class="container">
+
+<h2 class="sectionTitle">
+🔥 Trò chơi
+</h2>
 
 <div class="grid">
 
 <div class="card">
 
-<h2>🐍 Rắn săn mồi</h2>
+<div class="icon">🐍</div>
+
+<h2>Rắn săn mồi</h2>
 
 <p>
-Ăn mồi để tăng điểm và leo bảng xếp hạng.
+Ăn mồi để tăng điểm và leo TOP.
 </p>
 
 <button
@@ -23,28 +223,15 @@ Chơi ngay </button>
 
 <div class="card">
 
-<h2>🏆 Bảng xếp hạng</h2>
+<div class="icon">🚀</div>
 
-<p>
-Top người chơi có điểm cao nhất.
-</p>
-
-<button
-class="playBtn"
-onclick="document.getElementById('leaderboard').scrollIntoView();">
-Xem TOP </button>
-
-</div>
-
-<div class="card">
-
-<h2>🚀 Bắn máy bay</h2>
+<h2>Bắn máy bay</h2>
 
 <p>
 Sắp cập nhật.
 </p>
 
-<button class="playBtn coming">
+<button class="comingBtn">
 Sắp ra mắt
 </button>
 
@@ -52,13 +239,15 @@ Sắp ra mắt
 
 <div class="card">
 
-<h2>❌⭕ Cờ caro</h2>
+<div class="icon">❌⭕</div>
+
+<h2>Cờ Caro</h2>
 
 <p>
 Sắp cập nhật.
 </p>
 
-<button class="playBtn coming">
+<button class="comingBtn">
 Sắp ra mắt
 </button>
 
@@ -66,25 +255,127 @@ Sắp ra mắt
 
 </div>
 
-<h2 style="margin-top:40px;text-align:center;">
+<h2 class="sectionTitle">
 🏆 TOP 10 NGƯỜI CHƠI
 </h2>
 
-<table id="leaderboard"
-style="
-width:100%;
-margin-top:20px;
-border-collapse:collapse;
-background:white;
-color:black;
-">
+<table id="leaderboard">
+
 <tr>
-<th style="padding:10px;border:1px solid #ddd;">Hạng</th>
-<th style="padding:10px;border:1px solid #ddd;">Email</th>
-<th style="padding:10px;border:1px solid #ddd;">Điểm</th>
+<th>Hạng</th>
+<th>Email</th>
+<th>Điểm</th>
 </tr>
+
 </table>
+
+</div>
 
 <div class="footer">
 Game Hub by Lee Wang Jung
 </div>
+
+<script type="module">
+
+import { initializeApp }
+from "https://www.gstatic.com/firebasejs/12.0.0/firebase-app.js";
+
+import {
+getAuth,
+onAuthStateChanged,
+signOut
+}
+from "https://www.gstatic.com/firebasejs/12.0.0/firebase-auth.js";
+
+import {
+getFirestore,
+collection,
+query,
+orderBy,
+limit,
+getDocs
+}
+from "https://www.gstatic.com/firebasejs/12.0.0/firebase-firestore.js";
+
+const firebaseConfig = {
+apiKey: "AIzaSyA4uQqg-Akwqm6F3PfxUrnXY_UNCvIVsxo",
+authDomain: "my-login-app-8cd0a.firebaseapp.com",
+projectId: "my-login-app-8cd0a",
+storageBucket: "my-login-app-8cd0a.firebasestorage.app",
+messagingSenderId: "963802399528",
+appId: "1:963802399528:web:5deb03e885033c9443461d"
+};
+
+const app = initializeApp(firebaseConfig);
+
+const auth = getAuth(app);
+
+const db = getFirestore(app);
+
+onAuthStateChanged(auth,(user)=>{
+
+if(user){
+
+document.getElementById("userEmail").innerText =
+user.email;
+
+}else{
+
+location.href="index.html";
+
+}
+
+});
+
+window.logout = async ()=>{
+
+await signOut(auth);
+
+location.href="index.html";
+
+};
+
+async function loadLeaderboard(){
+
+const q = query(
+collection(db,"scores"),
+orderBy("score","desc"),
+limit(10)
+);
+
+const snapshot = await getDocs(q);
+
+let html = `
+<tr>
+<th>Hạng</th>
+<th>Email</th>
+<th>Điểm</th>
+</tr>
+`;
+
+let rank = 1;
+
+snapshot.forEach((doc)=>{
+
+const data = doc.data();
+
+html += `
+<tr>
+<td>${rank++}</td>
+<td>${data.email}</td>
+<td>${data.score}</td>
+</tr>
+`;
+
+});
+
+document.getElementById("leaderboard").innerHTML = html;
+
+}
+
+loadLeaderboard();
+
+</script>
+
+</body>
+</html>
