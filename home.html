@@ -1,79 +1,125 @@
 <!DOCTYPE html>
+
 <html lang="vi">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Quản lý sinh viên</title>
 
 <style>
+*{
+    box-sizing:border-box;
+    font-family:Arial,sans-serif;
+}
 
 body{
-font-family:Arial;
-background:#f5f5f5;
-padding:20px;
+    margin:0;
+    padding:20px;
+    background:#f4f6f9;
 }
 
 .container{
-max-width:900px;
-margin:auto;
-background:white;
-padding:20px;
-border-radius:10px;
+    max-width:1000px;
+    margin:auto;
+    background:white;
+    padding:20px;
+    border-radius:10px;
+    box-shadow:0 0 10px rgba(0,0,0,.1);
+}
+
+.header{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    margin-bottom:20px;
+}
+
+.admin-box{
+    padding:15px;
+    background:#eef5ff;
+    border-radius:10px;
+    margin-bottom:20px;
 }
 
 input{
-padding:10px;
-margin:5px;
+    padding:10px;
+    margin:5px;
 }
 
 button{
-padding:10px;
-cursor:pointer;
+    padding:10px 15px;
+    cursor:pointer;
 }
 
 table{
-width:100%;
-border-collapse:collapse;
-margin-top:20px;
+    width:100%;
+    border-collapse:collapse;
 }
 
 th,td{
-border:1px solid #ddd;
-padding:10px;
+    border:1px solid #ddd;
+    padding:10px;
+    text-align:left;
 }
 
 th{
-background:#007bff;
-color:white;
+    background:#007bff;
+    color:white;
 }
 
+.logout{
+    background:#dc3545;
+    color:white;
+    border:none;
+}
 </style>
+
 </head>
 <body>
 
 <div class="container">
 
+<div class="header">
+
+<div>
+<strong>Email:</strong>
+<span id="currentUser"></span>
+</div>
+
+<button class="logout" onclick="logout()">
+Đăng xuất
+</button>
+
+</div>
+
 <h1>Quản lý sinh viên</h1>
 
-<input id="name" placeholder="Họ tên">
+<div id="adminArea" class="admin-box">
 
-<input id="class" placeholder="Lớp">
+<h3>Khu vực quản trị</h3>
+
+<input
+id="name"
+placeholder="Họ tên sinh viên">
+
+<input
+id="className"
+placeholder="Lớp">
 
 <button onclick="addStudent()">
-Thêm
+Thêm sinh viên
 </button>
+
+</div>
 
 <table>
 
 <thead>
-
 <tr>
 <th>Họ tên</th>
 <th>Lớp</th>
-<th>Xóa</th>
+<th>Thao tác</th>
 </tr>
-
 </thead>
 
 <tbody id="studentTable">
@@ -98,90 +144,157 @@ doc
 }
 from "https://www.gstatic.com/firebasejs/12.0.0/firebase-firestore.js";
 
+import {
+getAuth,
+onAuthStateChanged,
+signOut
+}
+from "https://www.gstatic.com/firebasejs/12.0.0/firebase-auth.js";
+
 const firebaseConfig = {
+  apiKey: "AIzaSyA4uQqg-Akwqm6F3PfxUrnXY_UNCvIVsxo",
+  authDomain: "my-login-app-8cd0a.firebaseapp.com",
+  projectId: "my-login-app-8cd0a",
+  storageBucket: "my-login-app-8cd0a.firebasestorage.app",
+  messagingSenderId: "963802399528",
+  appId: "1:963802399528:web:5deb03e885033c9443461d"
+};
 
-apiKey: "AIzaSyA4uQqg-Akwqm6F3PfxUrnXY_UNCvIVsxo",
+const ADMIN_EMAIL = "admin@gmail.com";
 
-authDomain: "my-login-app-8cd0a.firebaseapp.com",
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+const auth = getAuth(app);
 
-projectId: "my-login-app-8cd0a",
+let currentUserEmail = "";
 
-storageBucket: "my-login-app-8cd0a.firebasestorage.app",
+onAuthStateChanged(auth, async (user)=>{
 
-messagingSenderId: "963802399528",
+    if(!user){
+        window.location.href = "index.html";
+        return;
+    }
 
-appId: "1:963802399528:web:5deb03e885033c9443461d"
+    currentUserEmail = user.email;
+
+    document.getElementById("currentUser").innerText =
+    user.email;
+
+    if(user.email !== ADMIN_EMAIL){
+        document.getElementById("adminArea").style.display =
+        "none";
+    }
+
+    await loadStudents();
+
+});
+
+window.logout = async ()=>{
+
+    await signOut(auth);
+
+    window.location.href = "index.html";
 
 };
 
-const app = initializeApp(firebaseConfig);
-
-const db = getFirestore(app);
-
 window.addStudent = async ()=>{
 
-const name =
-document.getElementById("name").value;
+    if(currentUserEmail !== ADMIN_EMAIL){
+        alert("Bạn không có quyền thêm dữ liệu");
+        return;
+    }
 
-const className =
-document.getElementById("class").value;
+    const name =
+    document.getElementById("name").value.trim();
 
-await addDoc(
-collection(db,"students"),
-{
-name:name,
-className:className
-}
-);
+    const className =
+    document.getElementById("className").value.trim();
 
-loadStudents();
+    if(!name || !className){
+        alert("Vui lòng nhập đầy đủ thông tin");
+        return;
+    }
+
+    try{
+
+        await addDoc(
+            collection(db,"students"),
+            {
+                name:name,
+                className:className
+            }
+        );
+
+        document.getElementById("name").value="";
+        document.getElementById("className").value="";
+
+        await loadStudents();
+
+    }catch(error){
+
+        console.error(error);
+        alert(error.message);
+
+    }
+
+};
+
+window.removeStudent = async(id)=>{
+
+    if(currentUserEmail !== ADMIN_EMAIL){
+        alert("Bạn không có quyền xóa");
+        return;
+    }
+
+    try{
+
+        await deleteDoc(
+            doc(db,"students",id)
+        );
+
+        await loadStudents();
+
+    }catch(error){
+
+        console.error(error);
+        alert(error.message);
+
+    }
 
 };
 
 async function loadStudents(){
 
-const table =
-document.getElementById("studentTable");
+    const table =
+    document.getElementById("studentTable");
 
-table.innerHTML="";
+    table.innerHTML = "";
 
-const querySnapshot =
-await getDocs(
-collection(db,"students")
-);
+    const querySnapshot =
+    await getDocs(
+        collection(db,"students")
+    );
 
-querySnapshot.forEach((student)=>{
+    querySnapshot.forEach((student)=>{
 
-const data = student.data();
+        const data = student.data();
 
-table.innerHTML += `
-<tr>
-<td>${data.name}</td>
-<td>${data.className}</td>
-<td>
-<button onclick="removeStudent('${student.id}')">
-Xóa
-</button>
-</td>
-</tr>
-`;
+        const action =
+        currentUserEmail === ADMIN_EMAIL
+        ? `<button onclick="removeStudent('${student.id}')">Xóa</button>`
+        : `Chỉ xem`;
 
-});
+        table.innerHTML += `
+        <tr>
+            <td>${data.name}</td>
+            <td>${data.className}</td>
+            <td>${action}</td>
+        </tr>
+        `;
+
+    });
 
 }
-
-window.removeStudent =
-async(id)=>{
-
-await deleteDoc(
-doc(db,"students",id)
-);
-
-loadStudents();
-
-};
-
-loadStudents();
 
 </script>
 
