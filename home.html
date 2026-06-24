@@ -372,16 +372,9 @@ localStorage.getItem("nickname");
 
 if(!nickname){
 
-nickname = prompt(
-"🎮 Chào mừng!\n\nNhập tên nhân vật của bạn:"
-);
-
-if(
-!nickname ||
-nickname.trim()===""
-){
-nickname = "Người chơi";
-}
+nickname =
+user.displayName ||
+"Người chơi";
 
 localStorage.setItem(
 "nickname",
