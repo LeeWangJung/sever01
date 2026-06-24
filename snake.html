@@ -171,9 +171,6 @@ doc(db,"users",user.uid);
 const userSnap =
 await getDoc(userRef);
 
-const userSnap =
-await getDoc(userRef);
-
 if(userSnap.exists()){
 
 document.getElementById("playerEmail").innerText =
@@ -284,16 +281,7 @@ updatedAt: Date.now()
 {merge:true}
 );
 
-console.log("Đã lưu nickname:",nickname);
-
-}
-
-}
-  catch(err){
-
-console.error(err);
-
-}
+console.log("Đã lưu nickname:", nickname);
 
 }
 
