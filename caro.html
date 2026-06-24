@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>❌⭕ Cờ Caro</title>
+
+<style>
+body{
+background:#0f172a;
+color:white;
+font-family:Arial,sans-serif;
+display:flex;
+flex-direction:column;
+align-items:center;
+padding:20px;
+}
+
+h1{
+margin-bottom:10px;
+}
+
+#status{
+font-size:22px;
+margin-bottom:20px;
+}
+
+.board{
+display:grid;
+grid-template-columns:repeat(3,100px);
+gap:5px;
+}
+
+.cell{
+width:100px;
+height:100px;
+background:#1e293b;
+border:2px solid #22c55e;
+display:flex;
+justify-content:center;
+align-items:center;
+font-size:50px;
+cursor:pointer;
+}
+
+.cell:hover{
+background:#334155;
+}
+
+button{
+margin-top:20px;
+padding:10px 20px;
+border:none;
+border-radius:10px;
+cursor:pointer;
+color:white;
+}
+
+.reset{
+background:#22c55e;
+}
+
+.home{
+background:#ef4444;
+}
+</style>
+
+</head>
+
+<body>
+
+<h1>❌⭕ CỜ CARO</h1>
+
+<div id="status">
+Lượt: X
+</div>
+
+<div class="board" id="board"></div>
+
+<button class="reset" onclick="resetGame()">
+🔄 Chơi lại
+</button>
+
+<button
+class="home"
+onclick="location.href='home.html'">
+🏠 Về Game Hub </button>
+
+<script>
+
+const board = document.getElementById("board");
+
+const statusText =
+document.getElementById("status");
+
+let currentPlayer = "X";
+
+let gameActive = true;
+
+let cells =
+["","","","","","","","",""];
+
+const winPatterns = [
+
+[0,1,2],
+[3,4,5],
+[6,7,8],
+
+[0,3,6],
+[1,4,7],
+[2,5,8],
+
+[0,4,8],
+[2,4,6]
+
+];
+
+function createBoard(){
+
+board.innerHTML = "";
+
+cells.forEach((cell,index)=>{
+
+const div =
+document.createElement("div");
+
+div.classList.add("cell");
+
+div.innerText = cell;
+
+div.addEventListener(
+"click",
+()=>handleClick(index)
+);
+
+board.appendChild(div);
+
+});
+
+}
+
+function handleClick(index){
+
+if(
+cells[index] !== "" ||
+!gameActive
+){
+return;
+}
+
+cells[index] = currentPlayer;
+
+createBoard();
+
+checkWinner();
+
+currentPlayer =
+currentPlayer === "X"
+? "O"
+: "X";
+
+if(gameActive){
+
+statusText.innerText =
+"Lượt: " + currentPlayer;
+
+}
+
+}
+
+function checkWinner(){
+
+for(let pattern of winPatterns){
+
+const [a,b,c] = pattern;
+
+if(
+cells[a] &&
+cells[a] === cells[b] &&
+cells[a] === cells[c]
+){
+
+statusText.innerText =
+"🎉 Người thắng: " +
+cells[a];
+
+gameActive = false;
+
+return;
+
+}
+
+}
+
+if(!cells.includes("")){
+
+statusText.innerText =
+"🤝 Hòa";
+
+gameActive = false;
+
+}
+
+}
+
+function resetGame(){
+
+cells =
+["","","","","","","","",""];
+
+currentPlayer = "X";
+
+gameActive = true;
+
+statusText.innerText =
+"Lượt: X";
+
+createBoard();
+
+}
+
+createBoard();
+
+</script>
+
+</body>
+</html>
