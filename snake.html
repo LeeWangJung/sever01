@@ -164,7 +164,8 @@ if(user){
 currentUser = user;
 
 document.getElementById("playerEmail").innerText =
-"👤 " + user.email;
+"👤 " +
+(localStorage.getItem("nickname") || user.email);
 
 }else{
 
@@ -241,7 +242,7 @@ async function loadLeaderboard(){
 
 const q = query(
 collection(db,"scores"),
-orderBy("score","desc"),
+orderBy("snakeScore","desc"),
 limit(10)
 );
 
@@ -250,7 +251,7 @@ const snapshot = await getDocs(q);
 let html = `
 <tr>
 <th>Hạng</th>
-<th>Email</th>
+<th></th>
 <th>Điểm</th>
 </tr>
 `;
@@ -264,8 +265,8 @@ const data = doc.data();
 html += `
 <tr>
 <td>${rank++}</td>
-<td>${data.email}</td>
-<td>${data.score}</td>
+<td>${data.nickname || data.email}</td>
+<td>${data.snakeScore || 0}</td>
 </tr>
 `;
 
