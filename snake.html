@@ -227,9 +227,11 @@ if(!currentUser) return;
 await addDoc(
 collection(db,"scores"),
 {
-email:currentUser.email,
-score:score,
-createdAt:Date.now()
+email: currentUser.email,
+nickname: localStorage.getItem("nickname"),
+snakeScore: score,
+totalScore: score,
+updatedAt: Date.now()
 }
 );
 
