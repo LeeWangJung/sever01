@@ -177,11 +177,26 @@ color:#cbd5e1;
 </div>
 
 <div class="userBox">
+
 👤 <span id="userEmail">Đang tải...</span>
+
+<button
+onclick="changeName()"
+style="
+padding:10px 15px;
+border:none;
+border-radius:10px;
+background:#3b82f6;
+color:white;
+cursor:pointer;
+">
+✏️ Đổi tên
+</button>
 
 <button class="logout" onclick="logout()">
 Đăng xuất
 </button>
+
 </div>
 
 </div>
@@ -316,8 +331,31 @@ onAuthStateChanged(auth,(user)=>{
 
 if(user){
 
+let nickname =
+localStorage.getItem("nickname");
+
+if(!nickname){
+
+nickname = prompt(
+"🎮 Chào mừng!\n\nNhập tên nhân vật của bạn:"
+);
+
+if(
+!nickname ||
+nickname.trim()===""
+){
+nickname = "Người chơi";
+}
+
+localStorage.setItem(
+"nickname",
+nickname
+);
+
+}
+
 document.getElementById("userEmail").innerText =
-user.email;
+nickname;
 
 }else{
 
@@ -332,6 +370,29 @@ window.logout = async ()=>{
 await signOut(auth);
 
 location.href="index.html";
+
+};
+  window.changeName = ()=>{
+
+const newName = prompt(
+"Nhập tên mới:"
+);
+
+if(
+!newName ||
+newName.trim()===""
+){
+return;
+}
+
+localStorage.setItem(
+"nickname",
+newName
+);
+
+document.getElementById("userEmail")
+.innerText =
+newName;
 
 };
 
