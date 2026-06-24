@@ -341,7 +341,9 @@ collection,
 query,
 orderBy,
 limit,
-getDocs
+getDocs,
+doc,
+setDoc
 }
 from "https://www.gstatic.com/firebasejs/12.0.0/firebase-firestore.js";
 
@@ -360,11 +362,11 @@ const auth = getAuth(app);
 
 const db = getFirestore(app);
   const ADMIN_EMAIL = "admin@gmail.com";
-
+let currentUser = null;
 onAuthStateChanged(auth,(user)=>{
 
 if(user){
-
+currentUser = user;
 let nickname =
 localStorage.getItem("nickname");
 
@@ -387,9 +389,20 @@ nickname
 );
 
 }
+if(user.email === ADMIN_EMAIL){
+
+document.getElementById("userEmail").innerText =
+"👑 ADMIN | " + nickname;
+
+document.getElementById("adminPanel").style.display =
+"block";
+
+}else{
 
 document.getElementById("userEmail").innerText =
 nickname;
+
+}
 
 }else{
 
@@ -406,36 +419,42 @@ await signOut(auth);
 location.href="index.html";
 
 };
-  window.changeName = ()=>{
+ 
+window.changeName = ()=>{
 
-const newName = prompt(
-"Nhập tên mới:"
-);
+const newName = prompt("Nhập tên mới:");
 
-if(
-!newName ||
-newName.trim()===""
-){
+if(!newName || newName.trim()===""){
 return;
 }
 
-localStorage.setItem(
-"nickname",
-newName
+localStorage.setItem("nickname",newName);
+if(currentUser){
+
+const userRef =
+doc(db,"scores",currentUser.uid);
+
+setDoc(
+userRef,
+{
+nickname:newName
+},
+{merge:true}
 );
 
-if(user.email === ADMIN_EMAIL){
+}
+if(
+currentUser &&
+currentUser.email === ADMIN_EMAIL
+){
 
 document.getElementById("userEmail").innerText =
-"👑 ADMIN | " + nickname;
-
-document.getElementById("adminPanel").style.display =
-"block";
+"👑 ADMIN | " + newName;
 
 }else{
 
 document.getElementById("userEmail").innerText =
-nickname;
+newName;
 
 }
 
@@ -445,7 +464,7 @@ async function loadLeaderboard(){
 
 const q = query(
 collection(db,"scores"),
-orderBy("score","desc"),
+orderBy("core","desc"),
 limit(10)
 );
 
@@ -454,7 +473,7 @@ const snapshot = await getDocs(q);
 let html = `
 <tr>
 <th>Hạng</th>
-<th>Email</th>
+<th></th>
 <th>Điểm</th>
 </tr>
 `;
@@ -468,8 +487,8 @@ const data = doc.data();
 html += `
 <tr>
 <td>${rank++}</td>
-<td>${data.email}</td>
-<td>${data.score}</td>
+<td>${data.nickname || data.email}</td>
+<td>${data.totalScore || 0}</td>
 </tr>
 `;
 
