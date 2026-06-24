@@ -343,7 +343,8 @@ orderBy,
 limit,
 getDocs,
 doc,
-setDoc
+setDoc,
+getDoc
 }
 from "https://www.gstatic.com/firebasejs/12.0.0/firebase-firestore.js";
 
@@ -363,25 +364,49 @@ const auth = getAuth(app);
 const db = getFirestore(app);
   const ADMIN_EMAIL = "admin@gmail.com";
 let currentUser = null;
-onAuthStateChanged(auth,(user)=>{
+onAuthStateChanged(auth, async (user)=>{
 
-if(user){
+if(!user){
+location.href="index.html";
+return;
+}
+
 currentUser = user;
-let nickname =
-localStorage.getItem("nickname");
 
-if(!nickname){
+const userRef =
+doc(db,"users",user.uid);
+
+const userSnap =
+await getDoc(userRef);
+
+let nickname;
+
+if(userSnap.exists()){
 
 nickname =
-user.displayName ||
-"Người chơi";
+userSnap.data().nickname;
 
-localStorage.setItem(
-"nickname",
-nickname
+}else{
+
+nickname = prompt(
+"🎮 Nhập tên nhân vật:"
+);
+
+if(!nickname || nickname.trim()===""){
+nickname = "Người chơi";
+}
+
+await setDoc(
+userRef,
+{
+email:user.email,
+nickname:nickname,
+createdAt:Date.now()
+}
 );
 
 }
+
 if(user.email === ADMIN_EMAIL){
 
 document.getElementById("userEmail").innerText =
@@ -397,22 +422,7 @@ nickname;
 
 }
 
-}else{
-
-location.href="index.html";
-
-}
-
 });
-
-window.logout = async ()=>{
-
-await signOut(auth);
-
-location.href="index.html";
-
-};
- 
 window.changeName = ()=>{
 
 const newName = prompt("Nhập tên mới:");
@@ -421,7 +431,16 @@ if(!newName || newName.trim()===""){
 return;
 }
 
-localStorage.setItem("nickname",newName);
+const userRef =
+doc(db,"users",currentUser.uid);
+
+setDoc(
+userRef,
+{
+nickname:newName
+},
+{merge:true}
+);
 if(currentUser){
 
 const userRef =
