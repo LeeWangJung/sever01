@@ -165,9 +165,23 @@ if(user){
 
 currentUser = user;
 
+const userRef =
+doc(db,"users",user.uid);
+
+const userSnap =
+await getDoc(userRef);
+
+if(userSnap.exists()){
+
 document.getElementById("playerEmail").innerText =
-"👤 " +
-(localStorage.getItem("nickname") || user.email);
+"👤 " + userSnap.data().nickname;
+
+}else{
+
+document.getElementById("playerEmail").innerText =
+"👤 " + user.email;
+
+}
 
 }else{
 
@@ -228,33 +242,49 @@ async function saveScore(){
 if(!currentUser) return;
 
 const userRef =
-doc(db,"scores",currentUser.uid);
+doc(db,"users",currentUser.uid);
 
 const userSnap =
 await getDoc(userRef);
 
-let bestScore = 0;
+let nickname =
+currentUser.email;
 
 if(userSnap.exists()){
+nickname =
+userSnap.data().nickname;
+}
+
+const scoreRef =
+doc(db,"scores",currentUser.uid);
+
+const scoreSnap =
+await getDoc(scoreRef);
+
+let bestScore = 0;
+
+if(scoreSnap.exists()){
 bestScore =
-userSnap.data().snakeScore || 0;
+scoreSnap.data().snakeScore || 0;
 }
 
 if(score > bestScore){
 
-try{
-
 await setDoc(
-userRef,
+scoreRef,
 {
 email: currentUser.email,
-nickname: localStorage.getItem("nickname"),
+nickname: nickname,
 snakeScore: score,
 totalScore: score,
 updatedAt: Date.now()
 },
 {merge:true}
 );
+
+}
+
+}
 
 console.log("Lưu điểm thành công");
 
