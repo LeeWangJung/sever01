@@ -464,7 +464,7 @@ async function loadLeaderboard(){
 
 const q = query(
 collection(db,"scores"),
-orderBy("core","desc"),
+orderBy("totalScore","desc"),
 limit(10)
 );
 
