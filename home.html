@@ -480,15 +480,17 @@ let html = `
 
 let rank = 1;
 
-snapshot.forEach((doc)=>{
+snapshot.forEach((docItem)=>{
 
-const data = doc.data();
+const data = docItem.data();
+
+console.log(data);
 
 html += `
 <tr>
 <td>${rank++}</td>
-<td>${data.nickname || data.email}</td>
-<td>${data.totalScore || 0}</td>
+<td>${data.nickname || data.email || "Unknown"}</td>
+<td>${data.totalScore || data.snakeScore || 0}</td>
 </tr>
 `;
 
