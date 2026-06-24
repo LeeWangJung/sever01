@@ -285,7 +285,40 @@ Sắp ra mắt
 </table>
 
 </div>
+<div
+id="adminPanel"
+style="
+display:none;
+max-width:1200px;
+margin:auto;
+padding:20px;
+">
 
+<h2 class="sectionTitle">
+👑 KHU VỰC QUẢN TRỊ
+</h2>
+
+<div class="grid">
+
+<div class="card">
+
+<div class="icon">⚙️</div>
+
+<h2>Quản lý hệ thống</h2>
+
+<p>
+Chỉ Admin mới nhìn thấy mục này.
+</p>
+
+<button class="playBtn">
+Admin
+</button>
+
+</div>
+
+</div>
+
+</div>
 <div class="footer">
 Game Hub by Lee Wang Jung
 </div>
@@ -326,6 +359,7 @@ const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 
 const db = getFirestore(app);
+  const ADMIN_EMAIL = "admin@gmail.com";
 
 onAuthStateChanged(auth,(user)=>{
 
@@ -390,9 +424,20 @@ localStorage.setItem(
 newName
 );
 
-document.getElementById("userEmail")
-.innerText =
-newName;
+if(user.email === ADMIN_EMAIL){
+
+document.getElementById("userEmail").innerText =
+"👑 ADMIN | " + nickname;
+
+document.getElementById("adminPanel").style.display =
+"block";
+
+}else{
+
+document.getElementById("userEmail").innerText =
+nickname;
+
+}
 
 };
 
