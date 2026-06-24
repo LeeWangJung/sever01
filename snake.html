@@ -159,7 +159,7 @@ const db = getFirestore(app);
 
 let currentUser = null;
 
-onAuthStateChanged(auth,(user)=>{
+onAuthStateChanged(auth, async (user)=>{
 
 if(user){
 
@@ -167,6 +167,9 @@ currentUser = user;
 
 const userRef =
 doc(db,"users",user.uid);
+
+const userSnap =
+await getDoc(userRef);
 
 const userSnap =
 await getDoc(userRef);
@@ -247,12 +250,11 @@ doc(db,"users",currentUser.uid);
 const userSnap =
 await getDoc(userRef);
 
-let nickname =
-currentUser.email;
+let nickname = "Người chơi";
 
 if(userSnap.exists()){
 nickname =
-userSnap.data().nickname;
+userSnap.data().nickname || "Người chơi";
 }
 
 const scoreRef =
@@ -282,13 +284,12 @@ updatedAt: Date.now()
 {merge:true}
 );
 
-}
+console.log("Đã lưu nickname:",nickname);
 
 }
 
-console.log("Lưu điểm thành công");
-
-}catch(err){
+}
+  catch(err){
 
 console.error(err);
 
