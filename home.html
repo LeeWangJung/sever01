@@ -370,7 +370,13 @@ if(!user){
 location.href="index.html";
 return;
 }
+window.logout = async ()=>{
 
+await signOut(auth);
+
+location.href="index.html";
+
+};
 currentUser = user;
 
 const userRef =
