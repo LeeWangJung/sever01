@@ -242,6 +242,8 @@ userSnap.data().snakeScore || 0;
 
 if(score > bestScore){
 
+try{
+
 await setDoc(
 userRef,
 {
@@ -253,6 +255,14 @@ updatedAt: Date.now()
 },
 {merge:true}
 );
+
+console.log("Lưu điểm thành công");
+
+}catch(err){
+
+console.error(err);
+
+}
 
 }
 
