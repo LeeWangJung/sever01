@@ -134,11 +134,13 @@ from "https://www.gstatic.com/firebasejs/12.0.0/firebase-auth.js";
 import {
 getFirestore,
 collection,
-addDoc,
 query,
 orderBy,
 limit,
-getDocs
+getDocs,
+doc,
+getDoc,
+setDoc
 }
 from "https://www.gstatic.com/firebasejs/12.0.0/firebase-firestore.js";
 
@@ -225,19 +227,36 @@ async function saveScore(){
 
 if(!currentUser) return;
 
-await addDoc(
-collection(db,"scores"),
+const userRef =
+doc(db,"scores",currentUser.uid);
+
+const userSnap =
+await getDoc(userRef);
+
+let bestScore = 0;
+
+if(userSnap.exists()){
+bestScore =
+userSnap.data().snakeScore || 0;
+}
+
+if(score > bestScore){
+
+await setDoc(
+userRef,
 {
 email: currentUser.email,
 nickname: localStorage.getItem("nickname"),
 snakeScore: score,
 totalScore: score,
 updatedAt: Date.now()
-}
+},
+{merge:true}
 );
 
 }
 
+}
 async function loadLeaderboard(){
 
 const q = query(
