@@ -1,14 +1,15 @@
 <!DOCTYPE html>
-
 <html lang="vi">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>❌⭕ Cờ Caro</title>
+<title>🎮 Caro Online 15x15</title>
 
 <style>
+
 body{
+margin:0;
 background:#0f172a;
 color:white;
 font-family:Arial,sans-serif;
@@ -24,25 +25,34 @@ margin-bottom:10px;
 
 #status{
 font-size:22px;
-margin-bottom:20px;
+margin-bottom:15px;
+}
+
+#roomInfo{
+margin:10px;
+font-size:18px;
+color:#22c55e;
 }
 
 .board{
 display:grid;
-grid-template-columns:repeat(3,100px);
-gap:5px;
+grid-template-columns:repeat(15,40px);
+gap:2px;
+margin-top:20px;
 }
 
 .cell{
-width:100px;
-height:100px;
+width:40px;
+height:40px;
 background:#1e293b;
-border:2px solid #22c55e;
+border:1px solid #334155;
 display:flex;
 justify-content:center;
 align-items:center;
-font-size:50px;
+font-size:22px;
+font-weight:bold;
 cursor:pointer;
+user-select:none;
 }
 
 .cell:hover{
@@ -50,62 +60,80 @@ background:#334155;
 }
 
 button{
-margin-top:20px;
 padding:10px 20px;
 border:none;
 border-radius:10px;
 cursor:pointer;
+margin:5px;
+}
+
+.createBtn{
+background:#22c55e;
 color:white;
 }
 
-.reset{
-background:#22c55e;
+.joinBtn{
+background:#3b82f6;
+color:white;
 }
 
-.home{
+.homeBtn{
 background:#ef4444;
+color:white;
 }
-</style>
 
+input{
+padding:10px;
+border-radius:8px;
+border:none;
+width:180px;
+text-transform:uppercase;
+}
+
+</style>
 </head>
 
 <body>
 
-<h1>❌⭕ CỜ CARO</h1>
+<h1>❌⭕ CARO ONLINE</h1>
 
 <div id="status">
-Lượt: X
+Đăng nhập...
 </div>
 
-<div class="board" id="board"></div>
+<div>
 
-<button class="reset" onclick="resetGame()">
-🔄 Chơi lại
-</button>
-<h2>🎮 CARO ONLINE</h2>
-
-<button onclick="createRoom()">
+<button
+class="createBtn"
+onclick="createRoom()">
 🎯 Tạo phòng
 </button>
 
-<br><br>
-
 <input
 id="roomInput"
-placeholder="Nhập mã phòng">
+placeholder="Mã phòng">
 
-<button onclick="joinRoom()">
+<button
+class="joinBtn"
+onclick="joinRoom()">
 🚪 Vào phòng
 </button>
 
-<p id="roomInfo"></p>
+</div>
+
+<div id="roomInfo"></div>
+
+<div id="board" class="board"></div>
+
 <button
-class="home"
+class="homeBtn"
 onclick="location.href='home.html'">
-🏠 Về Game Hub </button>
+🏠 Về Game Hub
+</button>
 
 <script type="module">
-  import { initializeApp }
+
+import { initializeApp }
 from "https://www.gstatic.com/firebasejs/12.0.0/firebase-app.js";
 
 import {
@@ -117,35 +145,79 @@ from "https://www.gstatic.com/firebasejs/12.0.0/firebase-auth.js";
 import {
 getFirestore,
 doc,
+setDoc,
 getDoc,
-setDoc
+updateDoc,
+onSnapshot
 }
 from "https://www.gstatic.com/firebasejs/12.0.0/firebase-firestore.js";
+
 const firebaseConfig = {
+
 apiKey: "AIzaSyA4uQqg-Akwqm6F3PfxUrnXY_UNCvIVsxo",
 authDomain: "my-login-app-8cd0a.firebaseapp.com",
 projectId: "my-login-app-8cd0a",
 storageBucket: "my-login-app-8cd0a.firebasestorage.app",
 messagingSenderId: "963802399528",
 appId: "1:963802399528:web:5deb03e885033c9443461d"
+
 };
 
-const app = initializeApp(firebaseConfig);
-const auth = getAuth(app);
-const db = getFirestore(app);
+const app =
+initializeApp(firebaseConfig);
+
+const auth =
+getAuth(app);
+
+const db =
+getFirestore(app);
+
+const SIZE = 15;
 
 let currentUser = null;
 
-onAuthStateChanged(auth,(user)=>{
+let roomId = null;
 
-if(user){
-currentUser = user;
-}else{
-location.href = "index.html";
+let mySymbol = "";
+
+let currentTurn = "X";
+
+let boardData =
+Array(SIZE)
+.fill()
+.map(() =>
+Array(SIZE).fill("")
+);
+
+const board =
+document.getElementById("board");
+
+const statusText =
+document.getElementById("status");
+
+const roomInfo =
+document.getElementById("roomInfo");
+
+onAuthStateChanged(
+auth,
+(user)=>{
+
+if(!user){
+
+location.href="index.html";
+return;
+
 }
 
-});
-  function generateRoomId(){
+currentUser = user;
+
+statusText.innerText =
+"🎮 Tạo hoặc vào phòng";
+
+}
+);
+
+function generateRoomId(){
 
 return Math.random()
 .toString(36)
@@ -154,46 +226,102 @@ return Math.random()
 
 }
 
-window.createRoom = async ()=>{
+function createBoard(){
 
-if(!currentUser){
-alert("Chưa đăng nhập");
-return;
+board.innerHTML = "";
+
+for(let y=0;y<SIZE;y++){
+
+for(let x=0;x<SIZE;x++){
+
+const cell =
+document.createElement("div");
+
+cell.className =
+"cell";
+
+cell.innerText =
+boardData[y][x];
+
+cell.addEventListener(
+"click",
+()=>playMove(x,y)
+);
+
+board.appendChild(cell);
+
 }
 
-const roomId = generateRoomId();
+}
+
+}
+
+createBoard();
+
+window.createRoom =
+async ()=>{
+
+if(!currentUser){
+
+alert("Chưa đăng nhập");
+return;
+
+}
+
+roomId =
+generateRoomId();
+
+mySymbol = "X";
 
 await setDoc(
 doc(db,"rooms",roomId),
 {
-hostUid: currentUser.uid,
-guestUid: "",
-status: "waiting",
-createdAt: Date.now()
+hostUid:
+currentUser.uid,
+
+guestUid:
+"",
+
+turn:
+"X",
+
+winner:
+"",
+
+board:
+boardData
 }
 );
 
-document.getElementById("roomInfo").innerText =
-"🎉 Mã phòng: " + roomId;
+roomInfo.innerText =
+"🎉 Mã phòng: "
++ roomId;
+
+statusText.innerText =
+"⌛ Đang chờ đối thủ";
+
+listenRoom();
 
 };
 
-window.joinRoom = async ()=>{
+window.joinRoom =
+async ()=>{
 
-const roomId =
+const id =
 document.getElementById("roomInput")
 .value
 .trim()
 .toUpperCase();
 
-if(!roomId){
+if(!id){
 return;
 }
 
+const roomRef =
+doc(db,"rooms",id);
+
 const roomSnap =
-await getDoc(
-doc(db,"rooms",roomId)
-);
+await getDoc(roomRef);
 
 if(!roomSnap.exists()){
 
@@ -202,141 +330,197 @@ return;
 
 }
 
-alert("Đã vào phòng!");
+await updateDoc(
+roomRef,
+{
+guestUid:
+currentUser.uid
+}
+);
+
+roomId = id;
+
+mySymbol = "O";
+
+roomInfo.innerText =
+"🎉 Đã vào phòng: "
++ roomId;
+
+listenRoom();
 
 };
-const board = document.getElementById("board");
 
-const statusText =
-document.getElementById("status");
+function listenRoom(){
 
-let currentPlayer = "X";
+const roomRef =
+doc(db,"rooms",roomId);
 
-let gameActive = true;
+onSnapshot(
+roomRef,
+(snapshot)=>{
 
-let cells =
-["","","","","","","","",""];
+if(!snapshot.exists())
+return;
 
-const winPatterns = [
+const data =
+snapshot.data();
 
-[0,1,2],
-[3,4,5],
-[6,7,8],
+boardData =
+data.board;
 
-[0,3,6],
-[1,4,7],
-[2,5,8],
+currentTurn =
+data.turn;
 
-[0,4,8],
-[2,4,6]
+createBoard();
+
+if(data.winner){
+
+statusText.innerText =
+"🏆 Người thắng: "
++ data.winner;
+
+return;
+
+}
+
+if(currentTurn === mySymbol){
+
+statusText.innerText =
+"👉 Tới lượt bạn ("+
+mySymbol+")";
+
+}else{
+
+statusText.innerText =
+"⏳ Đợi đối thủ";
+
+}
+function checkWinner(board,x,y,symbol){
+
+const directions = [
+
+[1,0],
+[0,1],
+[1,1],
+[1,-1]
 
 ];
 
-function createBoard(){
+for(const [dx,dy] of directions){
 
-board.innerHTML = "";
+let count = 1;
 
-cells.forEach((cell,index)=>{
+let nx = x + dx;
+let ny = y + dy;
 
-const div =
-document.createElement("div");
+while(
+nx >= 0 &&
+ny >= 0 &&
+nx < SIZE &&
+ny < SIZE &&
+board[ny][nx] === symbol
+){
 
-div.classList.add("cell");
-
-div.innerText = cell;
-
-div.addEventListener(
-"click",
-()=>handleClick(index)
-);
-
-board.appendChild(div);
-
-});
+count++;
+nx += dx;
+ny += dy;
 
 }
 
-function handleClick(index){
+nx = x - dx;
+ny = y - dy;
+
+while(
+nx >= 0 &&
+ny >= 0 &&
+nx < SIZE &&
+ny < SIZE &&
+board[ny][nx] === symbol
+){
+
+count++;
+nx -= dx;
+ny -= dy;
+
+}
+
+if(count >= 5){
+return true;
+}
+
+}
+
+return false;
+
+}
+
+async function playMove(x,y){
+
+if(!roomId) return;
+
+if(currentTurn !== mySymbol)
+return;
+
+if(boardData[y][x] !== "")
+return;
+
+boardData[y][x] = mySymbol;
+
+let winner = "";
 
 if(
-cells[index] !== "" ||
-!gameActive
+checkWinner(
+boardData,
+x,
+y,
+mySymbol
+)
 ){
-return;
+
+winner = mySymbol;
+
 }
 
-cells[index] = currentPlayer;
-
-createBoard();
-
-checkWinner();
-
-currentPlayer =
-currentPlayer === "X"
+const nextTurn =
+mySymbol === "X"
 ? "O"
 : "X";
 
-if(gameActive){
-
-statusText.innerText =
-"Lượt: " + currentPlayer;
+await updateDoc(
+doc(db,"rooms",roomId),
+{
+board: boardData,
+turn: nextTurn,
+winner: winner
+}
+);
 
 }
 
-}
+window.resetRoom =
+async ()=>{
 
-function checkWinner(){
-
-for(let pattern of winPatterns){
-
-const [a,b,c] = pattern;
-
-if(
-cells[a] &&
-cells[a] === cells[b] &&
-cells[a] === cells[c]
-){
-
-statusText.innerText =
-"🎉 Người thắng: " +
-cells[a];
-
-gameActive = false;
-
+if(!roomId)
 return;
 
+boardData =
+Array(SIZE)
+.fill()
+.map(()=>
+Array(SIZE)
+.fill("")
+);
+
+await updateDoc(
+doc(db,"rooms",roomId),
+{
+board: boardData,
+turn: "X",
+winner: ""
 }
+);
 
-}
-
-if(!cells.includes("")){
-
-statusText.innerText =
-"🤝 Hòa";
-
-gameActive = false;
-
-}
-
-}
-
-function resetGame(){
-
-cells =
-["","","","","","","","",""];
-
-currentPlayer = "X";
-
-gameActive = true;
-
-statusText.innerText =
-"Lượt: X";
-
-createBoard();
-
-}
-
-createBoard();
+};
 
 </script>
 
