@@ -82,14 +82,129 @@ Lượt: X
 <button class="reset" onclick="resetGame()">
 🔄 Chơi lại
 </button>
+<h2>🎮 CARO ONLINE</h2>
 
+<button onclick="createRoom()">
+🎯 Tạo phòng
+</button>
+
+<br><br>
+
+<input
+id="roomInput"
+placeholder="Nhập mã phòng">
+
+<button onclick="joinRoom()">
+🚪 Vào phòng
+</button>
+
+<p id="roomInfo"></p>
 <button
 class="home"
 onclick="location.href='home.html'">
 🏠 Về Game Hub </button>
 
-<script>
+<script type="module">
+  import { initializeApp }
+from "https://www.gstatic.com/firebasejs/12.0.0/firebase-app.js";
 
+import {
+getAuth,
+onAuthStateChanged
+}
+from "https://www.gstatic.com/firebasejs/12.0.0/firebase-auth.js";
+
+import {
+getFirestore,
+doc,
+getDoc,
+setDoc
+}
+from "https://www.gstatic.com/firebasejs/12.0.0/firebase-firestore.js";
+const firebaseConfig = {
+apiKey: "AIzaSyA4uQqg-Akwqm6F3PfxUrnXY_UNCvIVsxo",
+authDomain: "my-login-app-8cd0a.firebaseapp.com",
+projectId: "my-login-app-8cd0a",
+storageBucket: "my-login-app-8cd0a.firebasestorage.app",
+messagingSenderId: "963802399528",
+appId: "1:963802399528:web:5deb03e885033c9443461d"
+};
+
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getFirestore(app);
+
+let currentUser = null;
+
+onAuthStateChanged(auth,(user)=>{
+
+if(user){
+currentUser = user;
+}else{
+location.href = "index.html";
+}
+
+});
+  function generateRoomId(){
+
+return Math.random()
+.toString(36)
+.substring(2,8)
+.toUpperCase();
+
+}
+
+window.createRoom = async ()=>{
+
+if(!currentUser){
+alert("Chưa đăng nhập");
+return;
+}
+
+const roomId = generateRoomId();
+
+await setDoc(
+doc(db,"rooms",roomId),
+{
+hostUid: currentUser.uid,
+guestUid: "",
+status: "waiting",
+createdAt: Date.now()
+}
+);
+
+document.getElementById("roomInfo").innerText =
+"🎉 Mã phòng: " + roomId;
+
+};
+
+window.joinRoom = async ()=>{
+
+const roomId =
+document.getElementById("roomInput")
+.value
+.trim()
+.toUpperCase();
+
+if(!roomId){
+return;
+}
+
+const roomSnap =
+await getDoc(
+doc(db,"rooms",roomId)
+);
+
+if(!roomSnap.exists()){
+
+alert("Không tìm thấy phòng");
+return;
+
+}
+
+alert("Đã vào phòng!");
+
+};
 const board = document.getElementById("board");
 
 const statusText =
